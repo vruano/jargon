@@ -9,7 +9,6 @@ import static java.lang.Math.*;
  */
 public class Beta {
 
-
     private static final double LN_SQRT_2PI = log(sqrt(2 * PI));
     private static final double SQRT_PI = Math.sqrt(PI);
     private static final double acu_min = 1e-300;
@@ -27,7 +26,6 @@ public class Beta {
     private static final double DBL_very_MIN = DBL_MIN / 4.;
     private static final double DBL_log_v_MIN = MathConstants.LN_2 * (DBL_MIN_EXP - 2);
     private static final double DBL_EPSILON = 2.2204460492503131e-16;
-
 
     private static double[] return_q_0(final boolean give_log_q) {
         if (give_log_q) {
@@ -547,6 +545,26 @@ public class Beta {
                 return new double[]{tx, 1 - tx};
             }
         }
+    }
+
+    public static double CDF(final double x, final double alpha, final double beta, final boolean log) {
+        if (Double.isNaN(x) || Double.isNaN(alpha) || Double.isNaN(beta))
+            return Double.NaN;
+        else if (alpha < 0 || beta < 0)
+            return Double.NaN;
+        else if (x <= 0)
+            return log ? Double.NEGATIVE_INFINITY : 0.0;
+        else if (x >= 1)
+            return log ? 0.0 : Double.NEGATIVE_INFINITY;
+        return pbeta_raw(x, alpha, beta, true, log);
+    }
+
+    public static double logCDF(final double x, final double alpha, final double beta) {
+        return CDF(x, alpha, beta, true);
+    }
+
+    public static double CDF(final double x, final double alpha, final double beta) {
+        return CDF(x, alpha, beta, false);
     }
 
     private static double pbeta_raw(double x, double a, double b, boolean lower_tail, boolean log_p) {
