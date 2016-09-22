@@ -13,24 +13,25 @@ public class Gaussian {
     {
         if (Double.isNaN(p) || Double.isNaN(mu) || Double.isNaN(sigma))
             return Double.NaN;
-        if (sigma < 0)
-            return Double.NaN;
         if (log) {
             if (p > 0.0)
                 return Double.NaN;
-            if (p == 0.0)
+            else if (p == 0.0)
                 return Double.POSITIVE_INFINITY;
-            if (p == Double.NEGATIVE_INFINITY)
+            else if (p == Double.NEGATIVE_INFINITY)
                 return Double.NEGATIVE_INFINITY;
         } else {
             if (p < 0 || p > 1)
                 return Double.NaN;
-            if (p == 0.0)
+            else if (p == 0.0)
                 return Double.NEGATIVE_INFINITY;
-            if (p == 1.0)
+            else if (p == 1.0)
                 return Double.POSITIVE_INFINITY;
         }
-        if (sigma == 0)
+
+        if (sigma < 0)
+            return Double.NaN;
+        else if (sigma == 0)
             return mu;
 
         final double p_ = log ? Math.exp(p) : p;
@@ -108,15 +109,15 @@ public class Gaussian {
         else if (sigma < 0)
             return Double.NaN;
         else if (sigma == 0)
-            return (x == mu) ? Double.POSITIVE_INFINITY : 0.0;
+            return (x == mu) ? Double.POSITIVE_INFINITY : (log ? Double.NEGATIVE_INFINITY : 0.0);
         else {
             final double standarizedX = Math.abs((x - mu) / sigma);
-            if (Double.isFinite(standarizedX))
+            if (!Double.isFinite(standarizedX))
                 return log ? Double.NEGATIVE_INFINITY : 0.0;
             else if (standarizedX >= 2 * Math.sqrt(Double.MAX_VALUE))
                 return log ? Double.NEGATIVE_INFINITY : 0.0;
             else if (log)
-                return -MathConstants.LN_SQRT_2PI + 0.5 * standarizedX * standarizedX + Math.log(sigma);
+                return -(MathConstants.LN_SQRT_2PI + 0.5 * standarizedX * standarizedX + Math.log(sigma));
             else if (standarizedX < 5)
                 return INV_SQRT_2PI * Math.exp(-.5 * standarizedX * standarizedX) / sigma;
             else if (standarizedX > Math.sqrt(-2 * MathConstants.LN_2 * (Double.MIN_EXPONENT +
@@ -145,7 +146,7 @@ public class Gaussian {
             if (!Double.isFinite(p))
                 return (x < mu) ? (log ? Double.NEGATIVE_INFINITY : 0.0) : (log ? 0.0 : 1.0);
             else {
-                return rawCDF(x, log)[0];
+                return rawCDF(p, log)[0];
             }
         }
 
@@ -231,7 +232,7 @@ public class Gaussian {
                         xden = xsq;
                         for (i = 0; i < 3; ++i) {
                             xnum = (xnum + RAWCDF_A[i]) * xsq;
-                            xden = (xden + RAWCDF_A[i]) * xsq;
+                            xden = (xden + RAWCDF_B[i]) * xsq;
                         }
                     } else xnum = xden = 0.0;
 
