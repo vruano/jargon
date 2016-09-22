@@ -161,7 +161,7 @@ public class GammaTest extends RTest {
             Assert.assertEquals(actual, expected, Math.abs(expected * 0.000000001));
     }
 
-    @DataProvider(name = "cdfData")
+    @DataProvider(name = "inverseCdfData")
     public Object[][] cdfData() {
         final List<Object[]> result = new ArrayList<>();
         result.add(new Object[] { 0.0, 0.0, 0.0 });

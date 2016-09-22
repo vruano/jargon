@@ -151,7 +151,7 @@ public class Beta {
         if ((log_p && alpha > 0) ||
                 (!log_p && (alpha < 0 || alpha > 1))) { // alpha is outside
 
-            throw new IllegalArgumentException(" isconsistent log_p and alpha");
+            throw new IllegalArgumentException(" inconsistent log_p and alpha");
         }
 
         //  p==0, q==0, p = Inf, q = Inf  <==> treat as one- or two-point mass
@@ -172,8 +172,6 @@ public class Beta {
                 return return_q_half(give_log_q);
             }
         }
-
-
 
     /* initialize */
         p_ = R_DT_qIv(log_p, lower_tail, alpha);/* lower_tail prob (in any case) */
