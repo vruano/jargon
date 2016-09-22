@@ -15,20 +15,16 @@ import java.util.List;
 /**
  * Unit tests for {@link Gaussian}
  */
-
-public class GaussianTest {
-
-
-    private static JRIEngine R;
+public final class GaussianTest extends RTest {
 
     @BeforeClass
     public void setUp() throws REngineException {
-        R = new JRIEngine();
+        super.setUp();
     }
 
     @AfterClass
     public void tearDown() {
-        R.close();
+        super.tearDown();
     }
 
     @Test(dataProvider = "densityData")
@@ -52,7 +48,6 @@ public class GaussianTest {
         else
             Assert.assertEquals(actual, expected, Math.abs(0.000000001 * expected));
     }
-
 
     @Test(dataProvider = "densityData")
     public void testCDF(final double mu, final double sigma, final double x) throws REXPMismatchException, REngineException {
@@ -161,6 +156,4 @@ public class GaussianTest {
         }
         return result.toArray(new Object[result.size()][]);
     }
-
-
 }

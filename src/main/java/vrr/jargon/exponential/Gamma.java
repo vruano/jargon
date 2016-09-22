@@ -13,66 +13,66 @@ import java.util.Arrays;
  */
 public class Gamma {
 
-
     private static final double LN2 = Math.log(2);
     private static final double M_cutoff = LN2 * Double.MAX_EXPONENT / DoubleConstants.DBL_EPSILON;
 
-    public double CDF(final double unscaledX, final double shape, final double scale, final boolean log) {
-        if (!Double.isFinite(shape) || shape < 0)
-            return Double.NaN;
-        if (!Double.isFinite(scale) || scale <= 0)
-            return Double.NaN;
+    public static double CDF(final double unscaledX, final double shape, final double scale, final boolean log) {
         if (Double.isNaN(unscaledX))
             return Double.NaN;
-
-        if (shape == 0)
+        else if (!Double.isFinite(shape) || shape < 0)
+            return Double.NaN;
+        else if (!Double.isFinite(scale) || scale <= 0)
+            return Double.NaN;
+        else if (Double.isNaN(unscaledX))
+            return Double.NaN;
+        else if (shape == 0)
             return unscaledX <= 0 ? (log ? Double.NEGATIVE_INFINITY : 0) : (log ? 0.0 : 1.0);
+        else {
+            final double x = unscaledX / scale; // after this transformation we can forget about the shape entirely.
 
-        final double x = unscaledX / scale; // after this transformation we can forget about the shape entirely.
-
-        if (x <= 0)
-            return 0;
-        if (x == Double.NEGATIVE_INFINITY)
-            return 1;
-
-        final double result;
-        if (x < 1)
-            result = CDF_smallx(x, shape, log);
-        else if (x <= shape - 1 && x < 0.8 * (shape + 50)) {
-            double sum = pd_upper_series(x, shape, log);/* = x/alph + o(x/alph) */
-            double d = dpois_wrap(shape, x, log);
-            result = log ? sum + d : sum * d;
-        } else if (shape - 1 < x && shape < 0.8 * (x + 50)) {
-            double sum;
-            double d = dpois_wrap(shape, x, log);
-            if (shape < 1) {
-                if (x * DoubleConstants.DBL_EPSILON > 1 - shape)
-                    sum = log ? 0.0 : 1.0;
-                else {
-                    double f = pd_lower_cf(shape, x - (shape - 1)) * x / shape;
-                    sum = log ? Math.log(f) : f;
+            if (x <= 0)
+                return log ? Double.NEGATIVE_INFINITY : 0;
+            else if (x == Double.NEGATIVE_INFINITY)
+                return log ? 0.0 : 1.0;
+            else {
+                final double result;
+                if (x < 1)
+                    result = CDF_smallx(x, shape, log);
+                else if (x <= shape - 1 && x < 0.8 * (shape + 50)) {
+                    double sum = pd_upper_series(x, shape, log);/* = x/alph + o(x/alph) */
+                    double d = dpois_wrap(shape, x, log);
+                    result = log ? sum + d : sum * d;
+                } else if (shape - 1 < x && shape < 0.8 * (x + 50)) {
+                    double sum;
+                    double d = dpois_wrap(shape, x, log);
+                    if (shape < 1) {
+                        if (x * DoubleConstants.DBL_EPSILON > 1 - shape)
+                            sum = log ? 0.0 : 1.0;
+                        else {
+                            double f = pd_lower_cf(shape, x - (shape - 1)) * x / shape;
+                            sum = log ? Math.log(f) : f;
+                        }
+                    } else {
+                        sum = pd_lower_series(x, shape - 1);
+                        sum = log ? Math.log1p(sum) : 1 + sum;
+                    }
+                    result = log
+                            ? d + sum > -LN2 ? Math.log(-Math.expm1(d + sum)) : Math.log1p(-Math.exp(d + sum))
+                            : 1 - d * sum;
+                } else {
+                    result = ppois_asymp_upper_tail(shape - 1, x, log);
                 }
-            } else {
-                sum = pd_lower_series(x, shape - 1);
-                sum = log ? Math.log1p(sum) : 1 + sum;
-            }
-            result = log
-                    ? d + sum > -LN2 ? Math.log(-Math.expm1(d + sum)) : Math.log1p(-Math.exp(d + sum))
-                    : 1 - d * sum;
-        } else {
-            result = ppois_asymp_upper_tail(shape - 1, x, log);
-        }
 
-        if (!log && result < Double.MIN_NORMAL / DoubleConstants.DBL_EPSILON) {
-            return Math.exp(CDF(x, shape, 1, true));
-        } else
-            return result;
+                if (!log && result < Double.MIN_NORMAL / DoubleConstants.DBL_EPSILON) {
+                    return Math.exp(CDF(x, shape, 1.0, true));
+                } else
+                    return result;
+            }
+        }
     }
 
     private static double CDF_smallx(final double x, final double shape, final boolean log) {
         double sum = 0, c = shape, n = 0, term;
-
-
         do {
             n++;
             c *= -x / n;
@@ -103,26 +103,32 @@ public class Gamma {
      * @param scale the scale parameter of the gamma distribution.
      * @param log whether the return should be logged.
      */
-    public double inverseCDF(final double p, final double shape, final double scale, final boolean log) {
-        if (!Double.isFinite(shape) || shape < 0)
-            return Double.NaN;
-        if (!Double.isFinite(scale) || scale <= 0)
-            return Double.NaN;
-        if (Double.isNaN(p))
+    public static double inverseCDF(final double p, final double shape, final double scale, final boolean log) {
+        if (Double.isNaN(p) || Double.isNaN(shape) || Double.isNaN(scale))
             return Double.NaN;
         if (!log) {
-            if (p <= 0)
-                return 0;
-            if (p >= 1)
+            if (p < 0.0 || p > 1.0)
+                return Double.NaN;
+            else if (p == 0.0)
+                return 0.0;
+            else if (p == 1.0)
                 return Double.POSITIVE_INFINITY;
         } else {
-            if (p == Double.NEGATIVE_INFINITY)
-                return 0;
-            if (p >= 0.0)
+            if (p > 0)
+                return Double.NaN;
+            else if (p == 0)
                 return Double.POSITIVE_INFINITY;
+            else if (p == Double.NEGATIVE_INFINITY)
+                return 0.0;
         }
 
-        final double M_LN2 = Math.log(2);
+        if (shape < 0)
+            return Double.NaN;
+        else if (scale <= 0)
+            return Double.NaN;
+
+
+
         final double EPS1 = 1e-2;
         final double EPS2 = 5e-7;
         final double EPS_N = 1e-15;
@@ -135,7 +141,7 @@ public class Gamma {
 
         final double i420  = 1./ 420.;
         final double i2520 = 1./ 2520.;
-        final double i5040 = 1./ 5040;
+        final double i5040 = 1./ 5040.;
 
         double p_, a, b, c, g, ch, ch0, p1;
         double p2, q, s1, s2, s3, s4, s5, s6, t, x;
@@ -167,7 +173,7 @@ public class Gamma {
                     max_it_Newton = 27;
                     break;
                 }
-                t = p2* Math.exp(shape* M_LN2 +g+p1-c*Math.log(ch));
+                t = p2* Math.exp(shape* MathConstants.LN_2 +g+p1-c*Math.log(ch));
                 b = t/ch;
                 a = 0.5*t - b*c;
                 s1 = (210+ a*(140+a*(105+a*(84+a*(70+60*a))))) * i420;
@@ -222,7 +228,7 @@ public class Gamma {
         return x;
     }
 
-    private double density(double x, double shape, double scale, boolean log) {
+    public static double density(double x, double shape, double scale, boolean log) {
         if (Double.isNaN(x) || Double.isNaN(shape) || Double.isNaN(scale))
             return Double.NaN;
         else if (shape < 0 || scale <= 0)
@@ -278,12 +284,12 @@ public class Gamma {
 
 	/* approximation for p tending to 1: */
             if( ch > 2.2*nu + 6 )
-                ch = -2*(log ? (p > - MathConstants.LN_2 ? Math.log(-Math.expm1(p)) : Math.log1p(-Math.exp(p))) : Math.log1p(-p) - c* Math.log(0.5*ch) + g);
+                ch = -2*((log ? (p > - MathConstants.LN_2 ? Math.log(-Math.expm1(p)) : Math.log1p(-Math.exp(p))) : Math.log1p(-p)) - c* Math.log(0.5*ch) + g);
 
         } else { /* "small nu" : 1.24*(-log(p)) <= nu <= 0.32 */
 
             ch = 0.4;
-            a =(p > - MathConstants.LN_2 ? Math.log(-Math.expm1(p)) : Math.log1p(-Math.exp(p))) + g + c* MathConstants.LN_2;
+            a =(log ? (p > - MathConstants.LN_2 ? Math.log(-Math.expm1(p)) : Math.log1p(-Math.exp(p))) : Math.log1p(-p)) + g + c* MathConstants.LN_2;
 
             do {
                 q = ch;
@@ -544,7 +550,7 @@ public class Gamma {
     private static final Chebyshev LOG_GAMMA_CORRECTION_CSERIES =
             new Chebyshev(Arrays.copyOfRange(LOG_GAMMA_CORRECTION_SERIES, 0, 5));
 
-    private static double  logGammaCorrection(final double x)
+    private static double logGammaCorrection(final double x)
     {
         final double xbig = 94906265.62425156;
         final double xmax = 3.745194030963158e306;
@@ -562,37 +568,7 @@ public class Gamma {
         return 1 / (x * 12);
     }
 
-    /**
-     *  *    "chebyshev_eval" evaluates the n-term Chebyshev series
-     *    "a" at "x".
-     * @param x
-     * @param a
-     * @param n
-     * @return
-     */
-    private static double chebyshev_eval(double x, final double[] a, final int n)
-    {
-        double b0, b1, b2, twox;
-        int i;
-
-        if (n < 1 || n > 1000)
-            return Double.NaN;
-
-        if (x < -1.1 || x > 1.1)
-            return Double.NaN;
-
-        twox = x * 2;
-        b2 = b1 = 0;
-        b0 = 0;
-        for (i = 1; i <= n; i++) {
-            b2 = b1;
-            b1 = b0;
-            b0 = twox * b1 - b2 + a[n - i];
-        }
-        return (b0 - b2) * 0.5;
-    }
-
-    private static final Chebyshev GAMMA_CSERIES = new Chebyshev(DoubleConstants.DBL_EPSILON / 20, new double[] {
+  private static final Chebyshev GAMMA_CSERIES = new Chebyshev(DoubleConstants.DBL_EPSILON / 20, new double[] {
                 +.8571195590989331421920062399942e-2,
                 +.4415381324841006757191315771652e-2,
                 +.5685043681599363378632664588789e-1,
@@ -994,5 +970,31 @@ public class Gamma {
             return d / Math.exp (lp);
         }
     }
+
+
+    public static double CDF(final double x, final double shape, final double scale) {
+        return CDF(x, shape, scale, false);
+    }
+
+    public static double logCDF(final double x, final double shape, final double scale) {
+        return CDF(x, shape, scale, true);
+    }
+
+    public static double inverseCDF(final double p, final double shape, final double scale) {
+        return inverseCDF(p, shape, scale, false);
+    }
+
+    public static double logInverseCDF(final double p, final double shape, final double scale) {
+        return inverseCDF(p, shape, scale, true);
+    }
+
+    public static double density(final double x, final double shape, final double scale) {
+        return density(x, shape, scale, false);
+    }
+
+    public static double logDensity(final double x, final double shape, final double scale) {
+        return density(x, shape, scale, true);
+    }
+
 }
 

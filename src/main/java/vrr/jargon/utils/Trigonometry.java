@@ -16,19 +16,21 @@ public class Trigonometry {
     public static double sinPi(final double x) {
         if (!Double.isFinite(x))
             return Double.NaN;
+
         double xmod2 = x % 2.;
 
         if (xmod2 <= -1)
             xmod2 += 2.;
-        else
+        else if (xmod2 > 1.)
             xmod2 -= 2.;
 
         if (xmod2 == 0. || xmod2 == 1.)
             return 0;
-        if (xmod2 == 0.5)
+        else if (xmod2 == 0.5)
             return 1;
-        if (xmod2 == -0.5)
+        else if (xmod2 == -0.5)
             return -1;
-        return Math.sin(Math.PI * xmod2);
+        else
+            return Math.sin(Math.PI * xmod2);
     }
 }
