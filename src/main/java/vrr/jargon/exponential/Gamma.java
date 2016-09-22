@@ -363,7 +363,7 @@ public class Gamma {
             0.1109139947083452201658320007192334e-13/* = (zeta(40+1)-1)/(40+1) */
     };
 
-    public static double logGammaPlus1(final double x) {
+    private static double logGammaPlus1(final double x) {
 
     /* coeffs[i] holds (zeta(i+2)-1)/(i+2) , i = 0:(N-1), N = 40 : */
         final int N = 40;
@@ -510,12 +510,12 @@ public class Gamma {
             a2 = c4 * a1 - c3 * a2;
             b2 = c4 * b1 - c3 * b2;
 
-            if (Math.abs (b2) > scalefactor) {
+            if (Math.abs(b2) > scalefactor) {
                 a1 /= scalefactor;
                 b1 /= scalefactor;
                 a2 /= scalefactor;
                 b2 /= scalefactor;
-            } else if (Math.abs (b2) < 1 / scalefactor) {
+            } else if (Math.abs(b2) < 1 / scalefactor) {
                 a1 *= scalefactor;
                 b1 *= scalefactor;
                 a2 *= scalefactor;
