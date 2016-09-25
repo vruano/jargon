@@ -29,24 +29,19 @@ public final class GaussianTest extends RTest {
 
     @Test(dataProvider = "densityData")
     public void testDensity(final double mu, final double sigma, final double x) throws REngineException, REXPMismatchException {
-        final REXP dnormCall = REXP.asCall("dnorm", new REXP[] { new REXPDouble(x), new REXPDouble(mu), new REXPDouble(sigma), new REXPLogical(false)});
-        final double expected = R.eval(dnormCall, null, true).asDouble();
+        final double expected = rCall("dnorm")
+            .with(x, mu, sigma)
+            .with(false)
+            .evalAsDouble();
         final double actual = Gaussian.density(x, mu, sigma, false);
-        if (Double.isNaN(expected))
-            Assert.assertTrue(Double.isNaN(actual));
-        else
-            Assert.assertEquals(actual, expected, 0.000000001);
+        assertEquals(actual, expected);
     }
 
     @Test(dataProvider = "densityData")
     public void testLogDensity(final double mu, final double sigma, final double x) throws REngineException, REXPMismatchException {
-        final REXP dnormCall = REXP.asCall("dnorm", new REXP[] { new REXPDouble(x), new REXPDouble(mu), new REXPDouble(sigma), new REXPLogical(true)});
-        final double expected = R.eval(dnormCall, null, true).asDouble();
+        final double expected = rCall("dnorm").with(x, mu, sigma).with(true).evalAsDouble();
         final double actual = Gaussian.density(x, mu, sigma, true);
-        if (Double.isNaN(expected))
-            Assert.assertTrue(Double.isNaN(actual));
-        else
-            Assert.assertEquals(actual, expected, Math.abs(0.000000001 * expected));
+        assertEquals(expected, actual);
     }
 
     @Test(dataProvider = "densityData")

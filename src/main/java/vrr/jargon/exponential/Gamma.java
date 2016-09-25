@@ -550,7 +550,7 @@ public class Gamma {
     private static final Chebyshev LOG_GAMMA_CORRECTION_CSERIES =
             new Chebyshev(Arrays.copyOfRange(LOG_GAMMA_CORRECTION_SERIES, 0, 5));
 
-    private static double logGammaCorrection(final double x)
+    static double logGammaCorrection(final double x)
     {
         final double xbig = 94906265.62425156;
         final double xmax = 3.745194030963158e306;
@@ -620,7 +620,7 @@ public class Gamma {
      * bet worth to port it although Java tends to be IEEE 754.
      * </p>
      */
-    private final static double IEEE_754_GAMMA_XMIN = -170.5674972726612;
+    final static double IEEE_754_GAMMA_XMIN = -170.5674972726612;
 
     /**
      * Maximum bound of the input of {@lonk #gamma}, precalculated
@@ -630,7 +630,7 @@ public class Gamma {
      * bet worth to port it although Java tends to be IEEE 754.
      * </p>
      */
-    private final static double IEEE_754_GAMMA_XMAX =  171.61447887182298;
+    final static double IEEE_754_GAMMA_XMAX =  171.61447887182298;
 
     private final static double XSML = Math.exp(Math.max(Math.log(Double.MIN_NORMAL), -Math.log(Double.MAX_VALUE)) + 0.01);
 

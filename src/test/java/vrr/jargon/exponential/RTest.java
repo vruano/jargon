@@ -1,9 +1,12 @@
 package vrr.jargon.exponential;
 
+import oracle.jvm.hotspot.jfr.StackTrace;
 import org.rosuda.REngine.*;
 import org.rosuda.REngine.JRI.JRIEngine;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.reporters.util.StackTraceTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +32,24 @@ public class RTest {
         return new RCall(method);
     }
 
+    protected void assertEquals(final double actual, final double expected, final String message) {
+        if (Double.isNaN(actual))
+            Assert.assertTrue(Double.isNaN(expected), message);
+        else
+            Assert.assertEquals(actual, expected, Math.abs(actual * epsilon()), message);
+    }
+
+    protected void assertEquals(final double actual, final double expected) {
+        if (Double.isNaN(actual))
+            Assert.assertTrue(Double.isNaN(expected), null);
+        else
+            Assert.assertEquals(actual, expected, Math.abs(actual * epsilon()), null);
+    }
+
+    protected double epsilon() {
+        return 1e-10;
+    }
+
     protected class RCall {
         private final String method;
 
@@ -45,6 +66,14 @@ public class RTest {
         public RCall with(final double ... values) {
             for (final double v : values) {
                 parameters.add(new REXPDouble(v));
+                parameterNames.add(null);
+            }
+            return this;
+        }
+
+        public RCall with(final boolean ... values) {
+            for (final boolean v : values) {
+                parameters.add(new REXPLogical(v));
                 parameterNames.add(null);
             }
             return this;

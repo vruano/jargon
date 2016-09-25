@@ -74,7 +74,7 @@ public class Beta {
     private static double R_pow_di(double x, int n) {
         double pow = 1.0;
 
-        if (Double.isNaN(x)) return x;
+        if (Double.isNaN(x)) return Double.NaN;
         if (n != 0) {
             if (!Double.isFinite(x)) return pow(x, (double) n);
             if (n < 0) {
@@ -105,6 +105,22 @@ public class Beta {
         return qbeta(q, alpha, beta, true, false);
     }
 
+    public static double beta(final double alpha, final double beta)
+    {
+        if (Double.isNaN(alpha) || Double.isNaN(beta))
+            return Double.NaN;
+        else if (alpha < 0 || beta < 0)
+            return Double.NaN;
+        else if (alpha == 0 || beta == 0)
+            return Double.POSITIVE_INFINITY;
+        else if (!Double.isFinite(alpha) || !Double.isFinite(beta))
+            return 0.0;
+        else if (alpha + beta < Gamma.IEEE_754_GAMMA_XMAX)
+            return (1 / Gamma.gamma(alpha + beta)) * Gamma.gamma(alpha) * Gamma.gamma(beta);
+        else {
+            return Math.exp(logBeta(alpha, beta));
+        }
+    }
 
     private static double qbeta(double alpha, double p, double q, boolean lower_tail, boolean log_p) {
 
@@ -140,18 +156,17 @@ public class Beta {
         // Assuming p >= 0, q >= 0  here ...
 
         // Deal with boundary cases here:
-        if (alpha == 0) {
+        if (alpha == (log_p ? Double.NEGATIVE_INFINITY : 0.0)) {
             return return_q_0(give_log_q);
         }
-        if (alpha == 1) {
+        if (alpha == (log_p ? 0.0 : 1.0)) {
             return return_q_1(give_log_q);
         }
 
         // check alpha {*before* transformation which may all accuracy}:
         if ((log_p && alpha > 0) ||
                 (!log_p && (alpha < 0 || alpha > 1))) { // alpha is outside
-
-            throw new IllegalArgumentException(" inconsistent log_p and alpha");
+            return new double[] { Double.NaN, Double.NaN };
         }
 
         //  p==0, q==0, p = Inf, q = Inf  <==> treat as one- or two-point mass
@@ -172,6 +187,7 @@ public class Beta {
                 return return_q_half(give_log_q);
             }
         }
+
 
     /* initialize */
         p_ = R_DT_qIv(log_p, lower_tail, alpha);/* lower_tail prob (in any case) */
@@ -577,13 +593,12 @@ public class Beta {
                 if (b == 0 || b / a == 0) // point mass 1 at 1 ==> P(X <= x) = 0, all x < 1
                     return (log_p ? Double.NEGATIVE_INFINITY : 0);
                 // else, remaining case:  a = b = Inf : point mass 1 at 1/2
-                if (x < 0.5) return (log_p ? 0 : 1);
-                else return (log_p ? Double.NEGATIVE_INFINITY : 0);
+                if (x < 0.5) return (log_p ? Double.NEGATIVE_INFINITY : 0);
+                else return (log_p ? 0 : 1);
             }
             // Now:  0 < a < Inf;  0 < b < Inf
 
-            double x1 = 0.5 - x + 0.5, w, wc;
-            int ierr;
+            double x1 = 0.5 - x + 0.5;
             //====
             final double[] w1 = bratio(a, b, x, x1, log_p); /* -> ./toms708.c */
             //====
@@ -2029,8 +2044,43 @@ public class Beta {
         return -a * (c + s);
     }
 
-    private static double logBeta(final double p, final double q) {
-        return Gamma.logGamma(p) + Gamma.logGamma(q) - Gamma.logGamma(p + q);
+    public static double logBeta(final double a, final double b) {
+        if(Double.isNaN(a) || Double.isNaN(b))
+            return Double.NaN;
+
+        double p = a, q = a;
+        if(b < p) p = b;/* := min(a,b) */
+        if(b > q) q = b;/* := max(a,b) */
+
+    /* both arguments must be >= 0 */
+        if (p < 0)
+            return Double.NaN;
+        else if (p == 0) {
+            return Double.POSITIVE_INFINITY;
+        }
+        else if (!Double.isFinite(q)) { /* q == +Inf */
+            return Double.NEGATIVE_INFINITY;
+        }
+
+        final double corr;
+        if (p >= 10) {
+	/* p and q are big. */
+            corr = Gamma.logGammaCorrection(p) + Gamma.logGammaCorrection(q) - Gamma.logGammaCorrection(p + q);
+            return log(q) * -0.5 + MathConstants.LN_SQRT_2PI + corr
+                    + (p - 0.5) * log(p / (p + q)) + q * log1p(-p / (p + q));
+        }
+        else if (q >= 10) {
+	/* p is small, but q is big. */
+            corr = Gamma.logGammaCorrection(q) - Gamma.logGammaCorrection(p + q);
+            return Gamma.logGamma(p) + corr + p - p * log(p + q)
+                    + (q - 0.5) * log1p(-p / (p + q));
+        }
+        else {
+	/* p and q are small: p <= q < 10. */
+	/* R change for very small args */
+            if (p < 1e-306) return Gamma.logGamma(p) + (Gamma.logGamma(q) - Gamma.logGamma(p+q));
+            else return log(Gamma.gamma(p) * (Gamma.gamma(q) / Gamma.gamma(p + q)));
+        }
     }
 
     static double brcomp(double a, double b, double x, double y, boolean log_p) {
