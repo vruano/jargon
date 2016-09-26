@@ -98,11 +98,11 @@ public class Beta {
     }
 
     public static double logInverseCDF(final double q, final double alpha, final double beta) {
-        return qbeta(q, alpha, beta, true, true);
+        return inverseCDF(q, alpha, beta, true);
     }
 
     public static double inverseCDF(final double q, final double alpha, final double beta) {
-        return qbeta(q, alpha, beta, true, false);
+        return inverseCDF(q, alpha, beta, false);
     }
 
     public static double beta(final double alpha, final double beta)
@@ -351,7 +351,7 @@ public class Beta {
 		    qbeta(0.21, .001, 0.05)
 		    try "left border" quickly, i.e.,
 		    try at smallest positive number: */
-                w = pbeta_raw(DBL_very_MIN, pp, qq, true, log_p);
+                w = CDF(DBL_very_MIN, pp, qq, true, log_p);
                 if (w > (log_p ? la : a)) {
                     if (log_p || abs(w - a) < abs(0 - a)) { // DBL_very_MIN is better than 0
                         tx = DBL_very_MIN;
@@ -391,7 +391,7 @@ public class Beta {
         boolean converged = false;
         //L_Newton:
     /* --------------------------------------------------------------------
-     * Solve for x by a modified Newton-Raphson method, using pbeta_raw()
+     * Solve for x by a modified Newton-Raphson method, using CDF()
      */
         r = 1 - pp;
         t = 1 - qq;
@@ -404,7 +404,7 @@ public class Beta {
             for (i_pb = 0; i_pb < 1000; i_pb++) {
                 // using log_p == TRUE  unconditionally here
                 // FIXME: if exp(u) = xinbta underflows to 0, like different formula pbeta_log(u, *)
-                y = pbeta_raw(xinbta, pp, qq, /*lower_tail = */ true, true);
+                y = CDF(xinbta, pp, qq, /*lower_tail = */ true, true);
 
 	    /* w := Newton step size for   L(u) = log F(e^u)  =!= 0;   u := log(x)
 	     *   =  (L(.) - la) / L'(.);  L'(u)= (F'(e^u) * e^u ) / F(e^u)
@@ -455,7 +455,7 @@ public class Beta {
 
             loop1:
             for (i_pb = 0; i_pb < 1000; i_pb++) {
-                y = pbeta_raw(xinbta, pp, qq, /*lower_tail = */ true, log_p);
+                y = CDF(xinbta, pp, qq, /*lower_tail = */ true, log_p);
                 // delta{y} :   d_y = y - (log_p ? la : a);
                 if (!Double.isFinite(y) && !(log_p && y == Double.NEGATIVE_INFINITY))// y = -Inf  is ok if(log_p)
                 { // ML_ERR_return_NAN :
@@ -508,7 +508,7 @@ public class Beta {
         log_ = log_p || use_log_x; // only for printing
         if ((log_ && y == Double.NEGATIVE_INFINITY) || (!log_ && y == 0)) {
             // stuck at left, try if smallest positive number is "better"
-            w = pbeta_raw(DBL_very_MIN, pp, qq, true, log_);
+            w = CDF(DBL_very_MIN, pp, qq, true, log_);
             if (log_ || abs(w - a) <= abs(y - a)) {
                 tx = DBL_very_MIN;
                 u_n = DBL_log_v_MIN;// = log(DBL_very_MIN)
@@ -540,7 +540,7 @@ public class Beta {
 		/* add one last Newton step on original x scale, e.g., for
 		   qbeta(2^-98, 0.125, 2^-96) */
                     final double xinbta = exp(u_n);
-                    final double y = pbeta_raw(xinbta, pp, qq, /*lower_tail = */ true, log_p);
+                    final double y = CDF(xinbta, pp, qq, /*lower_tail = */ true, log_p);
                     final double w = log_p
                             ? (y - la) * exp(y + logbeta + r * log(xinbta) + t * log1p(-xinbta))
                             : (y - a) * exp(logbeta + r * log(xinbta) + t * log1p(-xinbta));
@@ -570,7 +570,7 @@ public class Beta {
             return log ? Double.NEGATIVE_INFINITY : 0.0;
         else if (x >= 1)
             return log ? 0.0 : Double.NEGATIVE_INFINITY;
-        return pbeta_raw(x, alpha, beta, true, log);
+        return CDF(x, alpha, beta, true, log);
     }
 
     public static double logCDF(final double x, final double alpha, final double beta) {
@@ -581,8 +581,7 @@ public class Beta {
         return CDF(x, alpha, beta, false);
     }
 
-    private static double pbeta_raw(double x, double a, double b, boolean lower_tail, boolean log_p) {
-        {
+    static double CDF(double x, double a, double b, boolean lower_tail, boolean log_p) {
             // treat limit cases correctly here:
             if (a == 0 || b == 0 || !Double.isFinite(a) || !Double.isFinite(b)) {
                 // NB:  0 < x < 1 :
@@ -604,7 +603,6 @@ public class Beta {
             //====
             // ierr in {10,14} <==> bgrat() error code ierr-10 in 1:4; for 1 and 4, warned *there*
             return lower_tail ? w1[0] : w1[1];
-        } /* pbeta_raw() */
     }
 
 
@@ -2083,7 +2081,7 @@ public class Beta {
         }
     }
 
-    static double brcomp(double a, double b, double x, double y, boolean log_p) {
+    private static double brcomp(double a, double b, double x, double y, boolean log_p) {
 /* -----------------------------------------------------------------------
  *		 Evaluation of x^a * y^b / ExponentialUtils(a,b)
  * ----------------------------------------------------------------------- */

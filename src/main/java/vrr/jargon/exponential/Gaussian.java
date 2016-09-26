@@ -9,6 +9,11 @@ import vrr.jargon.utils.MathConstants;
  */
 public class Gaussian {
 
+    public static double inverseCDF(final double p, final double mu, final double sigma) {
+        return inverseCDF(p, mu, sigma, false);
+    }
+
+
     public static double inverseCDF(final double p, final double mu, final double sigma, final boolean log)
     {
         if (Double.isNaN(p) || Double.isNaN(mu) || Double.isNaN(sigma))
