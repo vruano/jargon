@@ -3,10 +3,7 @@ package vrr.jargon.exponential;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngineException;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +13,12 @@ import java.util.List;
  */
 public class BinomialTest extends RTest {
 
-    @BeforeClass
+    @BeforeTest
     public void setUp () throws REngineException {
         super.setUp();
     }
 
-    @AfterClass
+    @AfterTest
     public void tearDown() {
         super.tearDown();
     }

@@ -16,16 +16,16 @@ import java.util.Objects;
  * Created by valentin on 9/21/16.
  */
 public class RTest {
-    protected JRIEngine R;
+    protected static JRIEngine R;
 
-    @BeforeClass
-    public void setUp() throws REngineException {
-        R = new JRIEngine();
+    public synchronized void setUp() throws REngineException {
+        if (R == null) {
+            R = new JRIEngine();
+        }
     }
 
-    @AfterClass
-    public void tearDown() {
-        R.close();
+    public synchronized void tearDown() {
+        //R.close(); R = null;
     }
 
     protected RCall rCall(final String method) {
