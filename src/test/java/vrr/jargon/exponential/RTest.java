@@ -1,12 +1,9 @@
 package vrr.jargon.exponential;
 
-import oracle.jvm.hotspot.jfr.StackTrace;
+import org.apache.commons.math.util.DoubleArray;
 import org.rosuda.REngine.*;
 import org.rosuda.REngine.JRI.JRIEngine;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.reporters.util.StackTraceTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +47,7 @@ public class RTest {
         return 1e-10;
     }
 
-    protected class RCall {
+    public static class RCall {
         private final String method;
 
         private final List<REXP> parameters;
@@ -61,6 +58,12 @@ public class RTest {
             this.method = Objects.requireNonNull(method);
             parameterNames = new ArrayList<>();
             parameters = new ArrayList<>();
+        }
+
+        public RCall withArray(final double ... values) {
+            parameters.add(new REXPDouble(values));
+            parameterNames.add(null);
+            return this;
         }
 
         public RCall with(final double ... values) {
@@ -85,7 +88,7 @@ public class RTest {
             return this;
         }
 
-        public double evalAsDouble() throws REXPMismatchException, REngineException {
+        private REXP eval() throws REXPMismatchException, REngineException {
             final REXP[] callArray = new REXP[parameters.size() + 1];
             callArray[0] = new REXPSymbol(method);
             for (int i = 0; i < parameters.size(); i++) {
@@ -99,14 +102,39 @@ public class RTest {
                 }
             }
             final REXP call = new REXPLanguage(callItems);
-            return R.eval(call, null, true).asDouble();
+            return R.eval(call, null, true);
         }
 
+        public double evalAsDouble() throws REXPMismatchException, REngineException {
+            return eval().asDouble();
+        }
+
+        public double[] evalAsDoubleArray() throws REXPMismatchException, REngineException {
+            return eval().asDoubles();
+        }
+
+        public String toString() {
+            final REXP[] callArray = new REXP[parameters.size() + 1];
+            callArray[0] = new REXPSymbol(method);
+            for (int i = 0; i < parameters.size(); i++) {
+                callArray[i + 1] = parameters.get(i);
+            }
+            final RList callItems = new RList(callArray);
+            for (int i = 0; i < parameters.size(); i++) {
+                final String name = parameterNames.get(i);
+                if (name != null) {
+                    callItems.setKeyAt(i + 1, name);
+                }
+            }
+            final REXP call = new REXPLanguage(callItems);
+            return call.toDebugString();
+        }
 
         public RCall with(final String name, final boolean v) {
             parameterNames.add(name);
             parameters.add(new REXPLogical(v));
             return this;
         }
+
     }
 }

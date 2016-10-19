@@ -13,17 +13,63 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar:///usr/local/lib/R/3.3/site-library/rJava/jri/JRI.jar!/" />
-          <root url="jar:///usr/local/lib/R/3.3/site-library/rJava/jri/JRIEngine.jar!/" />
-          <root url="jar:///usr/local/lib/R/3.3/site-library/rJava/jri/REngine.jar!/" />
+          <root url="jar:///usr/local/lib/R/3.2/site-library/rJava/jri/REngine.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar:///usr/local/lib/R/3.2/site-library/rJava/jri/JRIEngine.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar:///usr/local/lib/R/3.2/site-library/rJava/jri/JRI.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="RUNTIME">
+      <library>
+        <CLASSES>
+          <root url="file:///usr/local/lib/R/3.2/site-library/rJava/jri/libjri.jnilib" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="library" name="Gradle: org.testng:testng:6.9.10" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.caliper:caliper:1.0-beta-2" level="project" />
     <orderEntry type="library" name="Gradle: com.beust:jcommander:1.48" level="project" />
     <orderEntry type="library" name="Gradle: org.beanshell:bsh:2.0b4" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.code.gson:gson:2.2.2" level="project" />
+    <orderEntry type="library" name="Gradle: joda-time:joda-time:2.1" level="project" />
+    <orderEntry type="library" name="Gradle: com.sun.jersey:jersey-client:1.11" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.guava:guava:18.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.inject:guice:3.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.inject.extensions:guice-multibindings:3.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.inject.extensions:guice-assistedinject:3.0" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.commons:commons-math:2.2" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.code.java-allocation-instrumenter:java-allocation-instrumenter:3.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.sun.jersey:jersey-core:1.11" level="project" />
+    <orderEntry type="library" name="Gradle: javax.inject:javax.inject:1" level="project" />
+    <orderEntry type="library" name="Gradle: aopalliance:aopalliance:1.0" level="project" />
+    <orderEntry type="library" name="Gradle: org.sonatype.sisu.inject:cglib:2.2.1-v20090111" level="project" />
+    <orderEntry type="library" name="Gradle: org.ow2.asm:asm:5.0.3" level="project" />
+    <orderEntry type="library" name="Gradle: org.ow2.asm:asm-analysis:5.0.3" level="project" />
+    <orderEntry type="library" name="Gradle: org.ow2.asm:asm-commons:5.0.3" level="project" />
+    <orderEntry type="library" name="Gradle: org.ow2.asm:asm-tree:5.0.3" level="project" />
+    <orderEntry type="library" name="Gradle: org.ow2.asm:asm-util:5.0.3" level="project" />
+    <orderEntry type="library" name="Gradle: org.ow2.asm:asm-xml:5.0.3" level="project" />
+    <orderEntry type="library" name="Gradle: asm:asm:3.1" level="project" />
   </component>
   <component name="TestModuleProperties" production-module="jargon_main" />
 </module>
